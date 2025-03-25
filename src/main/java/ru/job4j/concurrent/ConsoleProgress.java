@@ -9,7 +9,7 @@ public class ConsoleProgress implements Runnable {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 Thread.sleep(500);
-                currentIndex = (currentIndex > 3) ? 0 : currentIndex;
+                currentIndex = (currentIndex == process.length) ? 0 : currentIndex;
                 System.out.print("\rload: " + process[currentIndex++]);
             }
         } catch (InterruptedException e) {
