@@ -6,8 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 public class Wget implements Runnable {
-    private static final int BUFFER_SIZE = 1024;
-    private static final int NANO_TO_MILLIS = 1_000_000;
+    private static final int MILLIS_IN_SECOND = 1000;
     private final String url;
     private final int speed;
     private final String fileName;
@@ -23,21 +22,24 @@ public class Wget implements Runnable {
         var file = new File(fileName);
         try (InputStream input = new URL(url).openStream();
              OutputStream output = new FileOutputStream(file)) {
-            byte[] dataBuffer = new byte[BUFFER_SIZE];
-            int bytesRead;
+            byte[] dataBuffer = new byte[speed];
+            int bytesRead, bytesCount = 0;
+            long startMillis = System.currentTimeMillis();
             while ((bytesRead = input.read(dataBuffer, 0, dataBuffer.length)) != -1) {
-                long startTime = System.nanoTime();
                 output.write(dataBuffer, 0, bytesRead);
-                long elapsedTime = System.nanoTime() - startTime;
-
-                long expectedTime = bytesRead / speed;
-                long sleepTime = expectedTime - (elapsedTime / NANO_TO_MILLIS);
+                bytesCount += bytesRead;
+                if (bytesCount < speed) {
+                    continue;
+                }
+                bytesCount = 0;
+                long sleepTime = MILLIS_IN_SECOND - (System.currentTimeMillis() - startMillis);
                 if (sleepTime > 0) {
-                    System.out.println("Засыпаем на: " + sleepTime + " мс.");
+                    System.out.printf("Засыпаем на %d мс.\n", sleepTime);
                     Thread.sleep(sleepTime);
                 }
+                startMillis = System.currentTimeMillis();
             }
-            System.out.println("Файл успешно загружен: " + fileName);
+            System.out.printf("Файл '%s' успешно загружен.\n", fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
@@ -48,7 +50,7 @@ public class Wget implements Runnable {
 
     public static void main(String[] args) throws InterruptedException {
         if (!validateArgs(args)) {
-            System.exit(1);
+            throw new RuntimeException("Invalid arguments");
         }
         String url = args[0];
         int speed = Integer.parseInt(args[1]);
