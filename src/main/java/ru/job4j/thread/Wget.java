@@ -28,18 +28,17 @@ public class Wget implements Runnable {
             while ((bytesRead = input.read(dataBuffer, 0, dataBuffer.length)) != -1) {
                 output.write(dataBuffer, 0, bytesRead);
                 bytesCount += bytesRead;
-                if (bytesCount < speed) {
-                    continue;
+                if (bytesCount >= speed) {
+                    bytesCount = 0;
+                    long sleepTime = MILLIS_IN_SECOND - (System.currentTimeMillis() - startMillis);
+                    if (sleepTime > 0) {
+                        System.out.printf("Засыпаем на %d мс.%n", sleepTime);
+                        Thread.sleep(sleepTime);
+                    }
+                    startMillis = System.currentTimeMillis();
                 }
-                bytesCount = 0;
-                long sleepTime = MILLIS_IN_SECOND - (System.currentTimeMillis() - startMillis);
-                if (sleepTime > 0) {
-                    System.out.printf("Засыпаем на %d мс.\n", sleepTime);
-                    Thread.sleep(sleepTime);
-                }
-                startMillis = System.currentTimeMillis();
             }
-            System.out.printf("Файл '%s' успешно загружен.\n", fileName);
+            System.out.printf("Файл '%s' успешно загружен.%n", fileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
