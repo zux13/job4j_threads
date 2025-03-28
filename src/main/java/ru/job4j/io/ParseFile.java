@@ -19,7 +19,7 @@ public class ParseFile {
     }
 
     private String content(Predicate<Character> filter) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             int data;
             while ((data = reader.read()) != -1) {
