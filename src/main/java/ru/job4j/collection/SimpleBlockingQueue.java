@@ -11,43 +11,25 @@ public class SimpleBlockingQueue<T> {
 
     @GuardedBy("this")
     private final Queue<T> queue = new LinkedList<>();
-    @GuardedBy("this")
     private final int size;
 
     public SimpleBlockingQueue(int size) {
         this.size = size;
     }
 
-    public synchronized void offer(T value) {
+    public synchronized void offer(T value) throws InterruptedException {
         while (queue.size() >= size) {
-            try {
-                System.out.println(Thread.currentThread().getName() + " is waiting for consumer");
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println(Thread.currentThread().getName() + " is interrupted.");
-                return;
-            }
+            wait();
         }
         queue.add(value);
-        System.out.println(Thread.currentThread().getName() + " has added value " + value);
         notifyAll();
     }
 
-    public synchronized T poll() {
+    public synchronized T poll() throws InterruptedException {
         while (queue.isEmpty()) {
-            try {
-                System.out.println(Thread.currentThread().getName() + " is waiting for supply");
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.err.println(Thread.currentThread().getName() + " was interrupted");
-                return null;
-            }
+            wait();
         }
-        T value = queue.poll();
-        System.out.println(Thread.currentThread().getName() + " is polling value " + value);
         notifyAll();
-        return value;
+        return queue.poll();
     }
 }

@@ -6,25 +6,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleBlockingQueueTest {
 
     @Test
-    void testProducerConsumer() throws InterruptedException {
+    void testSingleProducerSingleConsumer() throws InterruptedException {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(2);
 
         Thread producer = new Thread(() -> {
             try {
                 queue.offer(1);
                 queue.offer(2);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
         Thread consumer = new Thread(() -> {
             try {
-                Thread.sleep(50);
                 assertEquals(1, queue.poll());
                 assertEquals(2, queue.poll());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
@@ -39,26 +38,42 @@ public class SimpleBlockingQueueTest {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(3);
 
         Thread producer1 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
-                queue.offer(i);
+            try {
+                queue.offer(1);
+                queue.offer(2);
+                queue.offer(3);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
         Thread producer2 = new Thread(() -> {
-            for (int i = 3; i < 6; i++) {
-                queue.offer(i);
+            try {
+                queue.offer(4);
+                queue.offer(5);
+                queue.offer(6);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
         Thread consumer1 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
+            try {
                 assertNotNull(queue.poll());
+                assertNotNull(queue.poll());
+                assertNotNull(queue.poll());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
         Thread consumer2 = new Thread(() -> {
-            for (int i = 0; i < 3; i++) {
+            try {
                 assertNotNull(queue.poll());
+                assertNotNull(queue.poll());
+                assertNotNull(queue.poll());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
