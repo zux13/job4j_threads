@@ -29,8 +29,9 @@ public class SimpleBlockingQueue<T> {
         while (queue.isEmpty()) {
             wait();
         }
+        T value = queue.poll();
         notifyAll();
-        return queue.poll();
+        return value;
     }
 
     public synchronized boolean isEmpty() {
