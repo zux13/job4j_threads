@@ -4,14 +4,12 @@ import ru.job4j.collection.SimpleBlockingQueue;
 
 public class ParallelSearch {
 
-    private static volatile boolean finished = false;
-
     public static void main(String[] args) {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(3);
 
         final Thread consumer = new Thread(
                 () -> {
-                    while (!finished) {
+                    while (!Thread.currentThread().isInterrupted()) {
                         try {
                             System.out.println(queue.poll());
                         } catch (InterruptedException e) {
@@ -20,8 +18,6 @@ public class ParallelSearch {
                     }
                 }
         );
-
-        consumer.start();
 
         Thread producer = new Thread(
                 () -> {
@@ -33,15 +29,16 @@ public class ParallelSearch {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    finished = true;
                 }
         );
 
+        consumer.start();
         producer.start();
 
         try {
             producer.join();
             consumer.interrupt();
+            consumer.join();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
