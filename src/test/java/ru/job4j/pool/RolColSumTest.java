@@ -14,10 +14,15 @@ class RolColSumTest {
                 {14, 8, 9}
         };
 
-        RolColSum.Sums[] sums = RolColSum.sum(matrix);
+        Sums[] expected = {
+                new Sums(8, 17),
+                new Sums(23, 20),
+                new Sums(31, 25)
+        };
 
-        assertArrayEquals(new int[]{8, 23, 31}, new int[]{sums[0].getRowSum(), sums[1].getRowSum(), sums[2].getRowSum()});
-        assertArrayEquals(new int[]{17, 20, 25}, new int[]{sums[0].getColSum(), sums[1].getColSum(), sums[2].getColSum()});
+        Sums[] actual = RolColSum.sum(matrix);
+
+        assertArrayEquals(actual, expected);
     }
 
     @Test
@@ -28,30 +33,27 @@ class RolColSumTest {
                 {14, 8, 9}
         };
 
-        RolColSum.Sums[] syncSums = RolColSum.sum(matrix);
-        RolColSum.Sums[] asyncSums = RolColSum.asyncSum(matrix);
+        Sums[] syncSums = RolColSum.sum(matrix);
+        Sums[] asyncSums = RolColSum.asyncSum(matrix);
 
-        for (int i = 0; i < matrix.length; i++) {
-            assertEquals(syncSums[i].getRowSum(), asyncSums[i].getRowSum());
-            assertEquals(syncSums[i].getColSum(), asyncSums[i].getColSum());
-        }
+        assertArrayEquals(syncSums, asyncSums);
     }
 
     @Test
     void when1x1MatrixThenCorrectSums() {
         int[][] matrix = {{42}};
 
-        RolColSum.Sums[] sums = RolColSum.sum(matrix);
+        Sums[] expected = {new Sums(42, 42)};
+        Sums[] actual = RolColSum.asyncSum(matrix);
 
-        assertEquals(42, sums[0].getRowSum());
-        assertEquals(42, sums[0].getColSum());
+        assertArrayEquals(expected, actual);
     }
 
     @Test
     void whenEmptyMatrixThenEmptyResult() {
         int[][] matrix = new int[0][0];
 
-        RolColSum.Sums[] sums = RolColSum.sum(matrix);
+        Sums[] sums = RolColSum.sum(matrix);
 
         assertEquals(0, sums.length);
     }
